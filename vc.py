@@ -5,7 +5,6 @@
 import sys
 import ConfigParser
 import os
-import string
 import optparse	
 import urllib2
 

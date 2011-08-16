@@ -1,0 +1,4 @@
+vc.py - script to make calls with a Tandberg codec
+
+srv.pl - script to checl srv-records for h.323 and sip
+

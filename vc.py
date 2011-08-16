@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #coding: utf8 
 
-import pexpect
+
 import sys
 import ConfigParser
 import os

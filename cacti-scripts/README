@@ -1,0 +1,14 @@
+
+Templates to Cacti vcs(c/e) monitor scripts:
+
+ cacti_data_template_vcs_nontraversal.xml
+ cacti_data_template_vcs_traversal.xml
+ cacti_graph_template_vcs_nontraversal.xml
+ cacti_graph_template_vcs_traversal.xml
+
+Cacti script to monitor vcs(c/e), uses the templates above.
+
+ vcspoll.py
+
+
+

@@ -10,7 +10,7 @@ import urllib2
 
 
 '''
-checking comandoline options
+checking options
 '''
 p = optparse.OptionParser()
 p.add_option('--call','-c',dest="call",metavar="<number>")
@@ -22,7 +22,7 @@ options, arguments = p.parse_args()
 if len(arguments) >= 1:
   p.error("incorrect number of arguments")
 '''
-End of commando lin eoptions check
+End of options check
 '''
 
 

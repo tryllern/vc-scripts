@@ -44,6 +44,9 @@ if not os.path.exists(configfile):
   new_config.set("system","username",'%s' % input_username)
   input_username=raw_input("Password: ")
   new_config.set("system","password",'%s' % input_username)
+  input_username=raw_input("Type of system (E20 || C-codec): ")
+  new_config.set("system","systemtype",'%s' % input_username)
+ 
   with open(configfile, 'wb') as nyfil:
     new_config.write(nyfil) 
     print "saving config in ~/.tandberg"
@@ -57,6 +60,7 @@ try:
   ip=Config.get('system','ip')
   username=Config.get('system','username')
   password=Config.get('system','password')
+  systemtype=Config.get('system','password')
 except Exception:
   print "Error reading config file, quitting...2"
   quit()

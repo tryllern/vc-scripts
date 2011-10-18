@@ -154,7 +154,12 @@ def putUnmute(ip,username,password):
 if options.mute:
   putMute(ip,username,password)
 if options.call:
- putDial(ip,username,password,options.call)  
+ try:
+	output=putDial(ip,username,password,options.call) 
+ except Exception:
+	 print "Error making call.."
+	 print "Error message:%s" % output
+ 
 if options.disconnect:
  putDisconnectAll(ip,username,password)
 if options.unmute:

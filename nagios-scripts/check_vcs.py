@@ -20,8 +20,6 @@ Warning
 Critical - manditory
 
 '''
-
-	
 def findRealm(ip,username,password,request):
 	
   '''
@@ -45,7 +43,6 @@ def findRealm(ip,username,password,request):
 	q2 = realm_string.find('"', q1+1)
 	realm = realm_string[q1+1:q2]
 	return realm
-	
 def vcsgetxml(ip,username,password,request):
 	
     
@@ -59,11 +56,6 @@ def vcsgetxml(ip,username,password,request):
 	r = urllib2.Request(URL)
 	obj = urllib2.urlopen(r)
 	return obj.read()
-
-
-
-
-
 def vcsgetTraversalCalls(ip,username,password):
 	'''
 	   Returns a tulip (current,max,total)
@@ -126,7 +118,6 @@ def vcsgetUptime(ip,username,password):
 	dom = parseString(xmlResponse)
 	uptime=dom.getElementsByTagName('Uptime')[0]._get_firstChild().toprettyxml().rstrip()
 	return uptime
-
 def vcsgetCallLicenses(ip,username,password):
 	'''
 	Returns a tuple of Nontraversal,traversal,registration
@@ -143,6 +134,7 @@ def vcsgetCallLicenses(ip,username,password):
 	return (Nontraversal,Traversal,Registrations)
 
 
+
 '''
 checking command line options
 '''
@@ -156,8 +148,6 @@ p.add_option("--registrations",dest="registrations",help="Get Registrations info
 p.add_option("-w",dest='warning',help='Warning level')
 p.add_option("-c",dest='critical',help='Critical level')
 
-#p.add_option("--percent", dest='percent',help='gets licence usage in percent',action='store_const',const=1)
-
 options, arguments = p.parse_args()
 
 if len(arguments) >= 1:
@@ -165,7 +155,6 @@ if len(arguments) >= 1:
 '''
 End of commando lin option check
 '''
-
 '''
 Check if -i -u -p is commited
 '''

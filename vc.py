@@ -7,167 +7,146 @@ import ConfigParser
 import os
 import optparse	
 import urllib2
-
-
-'''
-checking options
-'''
-p = optparse.OptionParser()
-p.add_option('--call','-c',dest="call",metavar="<number>")
-p.add_option("-d", "--disconnect", dest="disconnect",action="store_const", const=1)
-p.add_option("-m","--mute",dest="mute", action="store_const", const=1)
-p.add_option("-u","--unmute",dest="unmute",action="store_const", const=1)
-
-options, arguments = p.parse_args()
-if len(arguments) >= 1:
-  p.error("incorrect number of arguments")
-'''
-End of options check
-'''
+import re
 
 
 
-'''
-Config file loading and checking
-'''
-Config = ConfigParser.ConfigParser()
-homedir= os.getenv("HOME")
-configfile='%s/.tandberg' % homedir
-if not os.path.exists(configfile):
+class codec:
+	
+	def __init__(self):
+		
+		self._readConfig()
+		self.lastCommand="__init__"
+		self.status="OK"
+	def _readConfig(self):
+		
+		'''
+		Config file loading and checking
+		'''
+		Config = ConfigParser.ConfigParser()
+		homedir= os.getenv("HOME")
+		configfile='%s/.tandberg' % homedir
+		if not os.path.exists(configfile):
+			raise NameError('Could not find config file')
 
-  print "Can't find config file, genrerating file...\n"
-  new_config = ConfigParser.RawConfigParser()
-  new_config.add_section("system")
-  input_ip= raw_input("Address(ip) to Unit: ")
-  new_config.set("system","ip",'%s' % input_ip)
-  input_username=raw_input("Username: ")
-  new_config.set("system","username",'%s' % input_username)
-  input_username=raw_input("Password: ")
-  new_config.set("system","password",'%s' % input_username)
-  input_username=raw_input("Type of system (E20 || C-codec): ")
-  new_config.set("system","systemtype",'%s' % input_username)
- 
-  with open(configfile, 'wb') as nyfil:
-    new_config.write(nyfil) 
-    print "saving config in ~/.tandberg"
-
-try:
-  Config.read(configfile)
-except Exception:
-  print "Error reading config file, quitting...1"
-  quit()
-try:
-  ip=Config.get('system','ip')
-  username=Config.get('system','username')
-  password=Config.get('system','password')
-  systemtype=Config.get('system','password')
-except Exception:
-  print "Error reading config file, quitting...2"
-  quit()
-
-
-
-
-def getxml(ip,username,password,request):
+		try:
+			Config.read(configfile)
+		except Exception:
+			raise NameError("Error reading config file, quitting...")
   
-  theurl='http://%s/getxml?location=' % ip
+		try:
+			self.ip=Config.get('system','ip')
+			self.username=Config.get('system','username')
+			self.password=Config.get('system','password')
+			#self.systemtype=Config.get('system','password')
+		except Exception:
+			raise( "Error reading config file, quitting...")
+  
+
+		
+	def _getxml(self,request):
+  
+		theurl='http://%s/getxml?location=' % self.ip
  
-  passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-  passman.add_password(None, theurl, username, password)
-  authhandler = urllib2.HTTPBasicAuthHandler(passman)
-  opener = urllib2.build_opener(authhandler)
-  urllib2.install_opener(opener)
-  answer= urllib2.urlopen(theurl + urllib2.quote(request))
-  return answer.read()
-def putDial(ip,username,password,number):
-  '''
-  Description:
-			Dials a number
-  Parameters:
-			ip - 		the ip adress of the codec
-			username -	username, usally 'admin'
-			password - 	password, on te/tc plattform the default is <blank> on MXP its 'TANDBERG'
-			number - 	Number to dial 
+		passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+		passman.add_password(None, theurl, self.username, self.password)
+		authhandler = urllib2.HTTPBasicAuthHandler(passman)
+		opener = urllib2.build_opener(authhandler)
+		urllib2.install_opener(opener)
+		answer= urllib2.urlopen(theurl + urllib2.quote(request))
+		return answer.read()		
+
+	
+	def _putxml(self,request):
+  
+		theurl='http://%s/formputxml?xmldoc=' % self.ip
+ 
+		passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+		passman.add_password(None, theurl, self.username, self.password)
+		authhandler = urllib2.HTTPBasicAuthHandler(passman)
+		opener = urllib2.build_opener(authhandler)
+		urllib2.install_opener(opener)
+		answer= urllib2.urlopen(theurl + urllib2.quote(request))
+		return answer.read()
+	
+	
+	
+	def Dial(self,number):
+
+		regex=re.compile('<Command>.*status="(.+)".*') 
+		request='<Command><Dial command="True"><Number>%s</Number></Dial></Command>' % (number)
+		answer=regex.search(self._putxml(request))
+		self.status=answer.group(1)
+		self.lastCommand="Dial"
+		return self.status
+	
+	def DisconnectAll(self):
+		
+		regex=re.compile('<Command>.*status="(.+)".*')
+		request='<Command><Call><DisconnectAll command="True"></DisconnectAll></Call></Command>'
+		answer=regex.search(self._putxml(request))
+		self.status=answer.group(1)
+		self.lastCommand="DisconnectAll"
+		return self.status
+	
+	def Mute(self):
+		
+		regex=re.compile('<Command>.*status="(.+)".*')
+		request='<Command><Audio><Microphones><Mute command="True"></Mute></Microphones></Audio></Command>'
+		answer=regex.search(self._putxml(request))
+		self.status=answer.group(1)
+		self.lastCommand="Mute"
+		return self.status	
+
+	def UnMute(self):
+		
+		regex=re.compile('<Command>.*status="(.+)".*')
+		request='<Command><Audio><Microphones><Unmute command="True"></Unmute></Microphones></Audio></Command>'
+		answer=regex.search(self._putxml(request))
+		self.status=answer.group(1)
+		self.lastCommand="UnMute"
+		return self.status
+
+
+
+if __name__=="__main__":
+
+	'''
+	checking options
+	'''
+	p = optparse.OptionParser()
+	p.add_option('--call','-c',dest="call",metavar="<number>")
+	p.add_option("-d", "--disconnect", dest="disconnect",action="store_const", const=1)
+	p.add_option("-m","--mute",dest="mute", action="store_const", const=1)
+	p.add_option("-u","--unmute",dest="unmute",action="store_const", const=1)
+
+	options, arguments = p.parse_args()
+
+	if len(arguments) >= 1:
+		p.error("incorrect number of arguments")
+	
+	'''
+	End of options check
+
+	'''
+
+
+
+	codec1=codec()
+
+	if options.mute:
+		print codec1.Mute()
+		
+	if options.call:
+		try:
+			output=codec1.Dial(options.call) 
+			print output
+		except Exception:
 			
-  Dependencies:
-			putxml()
-  '''
-  
-  
-  
-  
-  request='<Command><Dial command="True"><Number>%s</Number></Dial></Command>' % (number)
-  return putxml(ip,username,password,request)
-def putxml(ip,username,password,request):
-  
-  theurl='http://%s/formputxml?xmldoc=' % ip
+			print output
  
-  passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-  passman.add_password(None, theurl, username, password)
-  authhandler = urllib2.HTTPBasicAuthHandler(passman)
-  opener = urllib2.build_opener(authhandler)
-  urllib2.install_opener(opener)
-  answer= urllib2.urlopen(theurl + urllib2.quote(request))
-  return answer.read()
-def putDisconnectAll(ip,username,password):
-  ''' 
-    Description:
-			Disconnects all active calls
+	if options.disconnect:
+		print codec1.DisconnectAll()
+	if options.unmute:
+		print codec1.UnMute()
   
-    Parameters:
-			ip - 		the ip adress of the codec
-			username -	username, usally 'admin'
-			password - 	password, on te/tc plattform the default is <blank> on MXP its 'TANDBERG'
-  
-    Dependencies:
-			putxml()
-  
-  '''
-  request='<Command><Call><DisconnectAll command="True"></DisconnectAll></Call></Command>'
-  return putxml(ip,username,password,request)
-def putMute(ip,username,password):
-  '''
-   Mutes the microphone 
-   
-   Parameters:
-			ip - 		the ip adress of the codec
-			username -	username, usally 'admin'
-			password - 	password, on te/tc plattform the default is <blank> on MXP its 'TANDBERG'
-  
-  '''
-  request='<Command><Audio><Microphones><Mute command="True"></Mute></Microphones></Audio></Command>'
-  return putxml(ip,username,password,request)
-def putUnmute(ip,username,password):
-  '''
-  Unmutes the microphone
-  
-  Parameters:
-			ip - 		the ip adress of the codec
-			username -	username, usally 'admin'
-			password - 	password, on te/tc plattform the default is <blank> on MXP its 'TANDBERG'
-  
-  '''
-  request='<Command><Audio><Microphones><Unmute command="True"></Unmute></Microphones></Audio></Command>'
-  return putxml(ip,username,password,request)
-
-
-if options.mute:
-  putMute(ip,username,password)
-if options.call:
- try:
-	output=putDial(ip,username,password,options.call) 
- except Exception:
-	 print "Error making call.."
-	 print "Error message:%s" % output
- 
-if options.disconnect:
- putDisconnectAll(ip,username,password)
-if options.unmute:
-  putUnmute(ip,username,password)
-  
- 
-
-
-
-
-

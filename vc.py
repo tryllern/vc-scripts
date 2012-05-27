@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 #coding: utf8 
+'''
+Format of .tandberg file
 
+[system]
+ip=192.168.1.139
+username=admin
+password=TANDBERG
+
+
+'''
 
 import sys
 import ConfigParser

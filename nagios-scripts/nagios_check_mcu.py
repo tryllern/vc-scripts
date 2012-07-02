@@ -147,7 +147,7 @@ if video==0:
 if audio==0:
 	audio=0.1
 if total_video==0:
-	total_video==0.1
+	total_video=0.1
 if total_audio==0:
 	total_audio=0.1
 

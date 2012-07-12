@@ -2,7 +2,6 @@
 #coding: utf8
 #Version 1.1
 
-
 import xmlrpclib
 import optparse
 
@@ -61,6 +60,7 @@ def get_active_calls(server, username, password, port):
 	
 	if isdn_data['enabled']==0:  # if the isdn port is not active, return 0
 		return(0,0)
+
 	if isdn_data['enabled']==1:  # if the isdn port is active report ports in use
 		c=0
 		f=0
@@ -77,6 +77,7 @@ def get_active_calls(server, username, password, port):
 
 ports_in_use=0  # init of the active ports counter
 ports_not_in_use=0
+
 for i in range(4):   # there are up to four physical isdn ports, go trough all of them and count active lines
 	
 	(tmp_c,tmp_f)=get_active_calls(isdn_server,options.username,options.password,i)
@@ -84,8 +85,18 @@ for i in range(4):   # there are up to four physical isdn ports, go trough all o
 	ports_not_in_use=ports_not_in_use+tmp_f
 
 isdn_Available_Channels=ports_in_use+ports_not_in_use
+if int(ports_in_use)==0:
+	ports_in_use=0.1
+if int(isdn_Available_Channels)==0:
+	isdn_Available_Channels=0.1	
+
 percent_active_ports=int((float(ports_in_use)/float(isdn_Available_Channels))*100.0)
 
+if ports_in_use==0.1:
+	ports_in_use=0
+if isdn_Available_Channels==0.1:
+	isdn_Available_Channels=0
+	
 if percent_active_ports > int(options.critical):  
   print "%i ISDN Channels(%s percent) of %s in use " % (ports_in_use,percent_active_ports,isdn_Available_Channels)
   exit(2)

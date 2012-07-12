@@ -67,8 +67,16 @@ def getMCUVideoPorts(ip,username,password):
   urllib2.install_opener(opener)
   answer=urllib2.urlopen(theurl)
   answer=parseString(answer.read())
-  total_video_ports=answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[2][0:]
-  total_audio_ports=answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[2][0:]
+
+  
+  #total_video_ports=answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[2][0:]
+  #total_audio_ports=answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[2][0:]
+
+  total_video_ports=answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[1][0:]
+  total_audio_ports=answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[1][0:]
+
+
+
 
   #return video_ports
   return (total_video_ports,total_audio_ports)
@@ -77,6 +85,8 @@ def getMCUVideoPorts(ip,username,password):
 # sets up the connection to the server
 server="http://%s/RPC2"  % (options.ip) 
 mcu = xmlrpclib.Server(server)
+
+
 def getPerticipantsCount(ip, username, password, enumid=False, video_count=0, audio_count=0):
 	vCount=0
 	aCount=0

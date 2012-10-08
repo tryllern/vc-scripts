@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-# Version 1.1
+
 '''
-   print "Video calls:%s percent of %s in use, Audio calls:%s percent of %s in use |video_calls=%s, audio_calls=%s" %
+V1.2
+
+print "Video calls:%s percent of %s in use, Audio calls:%s percent of %s in use |video_calls=%s, audio_calls=%s" %
 
 shows percentage in use and performance data
 
@@ -11,6 +13,7 @@ import optparse
 import urllib2
 from urlparse import urlparse
 from xml.dom.minidom import parseString
+import math  # math.floor()
 
 '''
 Parsing of commandline options *start*
@@ -67,16 +70,8 @@ def getMCUVideoPorts(ip,username,password):
   urllib2.install_opener(opener)
   answer=urllib2.urlopen(theurl)
   answer=parseString(answer.read())
-
-  
-  #total_video_ports=answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[2][0:]
-  #total_audio_ports=answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[2][0:]
-
-  total_video_ports=answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[1][0:]
-  total_audio_ports=answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[1][0:]
-
-
-
+  total_video_ports=int(answer.getElementsByTagName('totalVideoPorts')[0].toprettyxml().split('\n')[1][0:])
+  total_audio_ports=int(answer.getElementsByTagName('totalAudioOnlyPorts')[0].toprettyxml().split('\n')[1][0:])
 
   #return video_ports
   return (total_video_ports,total_audio_ports)
@@ -85,9 +80,7 @@ def getMCUVideoPorts(ip,username,password):
 # sets up the connection to the server
 server="http://%s/RPC2"  % (options.ip) 
 mcu = xmlrpclib.Server(server)
-
-
-def getPerticipantsCount(ip, username, password, enumid=False, video_count=0, audio_count=0):
+def getPerticipantsCount(ip, username, password, enumid=False, video_count=0.1, audio_count=0.1):
 	vCount=0
 	aCount=0
 
@@ -136,7 +129,7 @@ def getPerticipantsCount(ip, username, password, enumid=False, video_count=0, au
 
 	
 	if enumid != False:
-		# fOR THE REURSION TO WORK YOU HAVE TO RETURN THE VALUE OF THE CALL DOWN THE LINE CALL->CALL->CALL-><ORIGINAL CALL>
+		# Recursive call
 		return getPerticipantsCount(ip, username, password, enumid, vCount, aCount)
 		
 	if enumid == False:
@@ -150,29 +143,21 @@ if not options.warning:
 
 (total_video,total_audio)=getMCUVideoPorts(options.ip,options.username,options.password)
 (audio, video) = getPerticipantsCount(options.ip, options.username, options.password)      
-      
-# change value if 0 so it don't throws a divide my 0 exception
-if video==0:
-	video=0.1
-if audio==0:
-	audio=0.1
-if total_video==0:
-	total_video=0.1
-if total_audio==0:
-	total_audio=0.1
 
+'''
+getting the floor value, the etPerticipantsCount() is called with audio/video=0.1 to avoid raising error on div by zero.
+'''
+audio=int(math.floor(audio))
+video=int(math.floor(video))
+
+print total_video
 percent_video=(float(video)/float(total_video))*100.0
 percent_video=int(percent_video)
       
 percent_audio=(float(audio)/float(total_audio))*100.0
 percent_audio=int(percent_audio)
 
-# change it back...
-if video==0.1:
-	video=0
-if audio==0.1:
-	audio=0
-  
+
       
 if percent_video > int(options.critical):  
   print "Video Ports:%s percent of %s in use |video_calls=%s, audio_calls=%s " % (percent_video,total_video,video,audio)

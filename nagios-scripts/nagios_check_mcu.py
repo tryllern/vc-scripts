@@ -150,7 +150,6 @@ getting the floor value, the etPerticipantsCount() is called with audio/video=0.
 audio=int(math.floor(audio))
 video=int(math.floor(video))
 
-print total_video
 percent_video=(float(video)/float(total_video))*100.0
 percent_video=int(percent_video)
       

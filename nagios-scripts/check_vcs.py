@@ -61,86 +61,94 @@ class HTTPRealmFinder:
 			def prt(self):
 				return self.get()
 
-def vcsgetxml(ip,username,password,request):
-	URL = 'https://%s/%s' % (ip,request)
-	realm=HTTPRealmFinder(URL)
-	realm=realm.prt()
-	ah = urllib2.HTTPDigestAuthHandler()
+def vcsgetxml(ip,username,password,request,proto='http'):
+	
+	if proto=='https':
+		URL = 'https://%s/%s' % (ip,request)
+		realm=HTTPRealmFinder(URL)
+		realm=realm.prt()
+		ah = urllib2.HTTPBasicAuthHandler()
+	if proto=='http':
+		URL = 'http://%s/%s' % (ip,request)
+		realm=HTTPRealmFinder(URL)
+		realm=realm.prt()
+		ah = urllib2.HTTPDigestAuthHandler()
+		
 	ah.add_password(realm,ip,username,password)
 	urllib2.install_opener(urllib2.build_opener(ah))
 	r = urllib2.Request(URL)
 	obj = urllib2.urlopen(r)
 	return obj.read()
 
-def vcsgetTraversalCalls(ip,username,password):
+def vcsgetTraversalCalls(ip,username,password,proto='http'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Calls/Traversal'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,proto)
 	#return xmlResponse
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetNonTraversalCalls(ip,username,password):
+def vcsgetNonTraversalCalls(ip,username,password,proto='http'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Calls/NonTraversal'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,proto)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetRegistrations(ip,username,password):
+def vcsgetRegistrations(ip,username,password,proto='http'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Registrations'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,proto)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetTURN(ip,username,password):
+def vcsgetTURN(ip,username,password,proto='http'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/TURN/Relays'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,proto)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetUptime(ip,username,password):
+def vcsgetUptime(ip,username,password,proto='http'):
 	'''
 	Uptime: <Time in seconds>
 	'''
 	
 	url='getxml?location=/Status/SystemUnit/Uptime'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,proto)
 	dom = parseString(xmlResponse)
 	uptime=dom.getElementsByTagName('Uptime')[0]._get_firstChild().toprettyxml().rstrip()
 	return uptime
-def vcsgetCallLicenses(ip,username,password):
+def vcsgetCallLicenses(ip,username,password,proto='http'):
 	'''
 	Returns a tuple of Nontraversal,traversal,registration
 	'''
 	
 	url='getxml?location=/Status/SystemUnit/Software/Configuration'
-	resp= vcsgetxml(ip,username,password,url)
+	resp= vcsgetxml(ip,username,password,url,proto)
 	
 	dom = parseString(resp)
 	Nontraversal= dom.getElementsByTagName('NonTraversalCalls')[0]._get_firstChild().toprettyxml().rstrip()
@@ -163,7 +171,7 @@ p.add_option("--nontraversal",dest='nontraversal',help='Get Non Traversal calls 
 p.add_option("--registrations",dest="registrations",help="Get Registrations info",action="store_const", const=1)
 p.add_option("-w",dest='warning',help='Warning level')
 p.add_option("-c",dest='critical',help='Critical level')
-
+p.add_option("-s",dest="secure",help="Use https, default is http",action="store_const", const=1)
 options, arguments = p.parse_args()
 
 if len(arguments) >= 1:
@@ -192,7 +200,12 @@ if options.critical is None:
 	exit(3)
 
 
-(licenses_nontrav,licenses_trav,licenses_reg)=vcsgetCallLicenses(options.ip,options.username,options.password)
+if options.secure:
+	proto='https'
+else:
+	proto='http'
+
+(licenses_nontrav,licenses_trav,licenses_reg)=vcsgetCallLicenses(options.ip,options.username,options.password,proto)
 
 #
 # if the warning options is not defined, set it as the same as critical
@@ -204,7 +217,7 @@ if not options.warning: options.warning=options.critical
 if options.traversal:
       import math
       
-      (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password)
+      (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password,proto)
       percent=(float(current)/float(licenses_trav))*100.0
       percent=int(percent)
       if percent > int(options.critical):  
@@ -226,7 +239,7 @@ if options.traversal:
 if options.nontraversal:
       import math
       
-      (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password)
+      (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password,proto)
       percent=(float(current)/float(licenses_nontrav))*100.0
       percent=int(percent)
       if percent > int(options.critical): 

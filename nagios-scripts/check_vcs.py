@@ -20,42 +20,58 @@ Warning
 Critical - manditory
 
 '''
-def findRealm(ip,username,password,request):
 	
-  '''
-  Finds the realm string when authentication fails, used to log into vcs
-  '''
-  theurl='http://%s/getxml?location=' % ip
- 
-  passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-  passman.add_password(None, theurl, username, password)
-  authhandler = urllib2.HTTPBasicAuthHandler(passman)
-  opener = urllib2.build_opener(authhandler)
-  urllib2.install_opener(opener)
-  try:
-	
-	answer= urllib2.urlopen(theurl + urllib2.quote(request))
-	return answer.read()
-	
-  except urllib2.HTTPError,e:
-	realm_string=e.headers.get('www-authenticate', '')
-	q1 = realm_string.find('"')
-	q2 = realm_string.find('"', q1+1)
-	realm = realm_string[q1+1:q2]
-	return realm
+class HTTPRealmFinderHandler(urllib2.HTTPBasicAuthHandler):
+			def http_error_401(self, req, fp, code, msg, headers):
+				realm_string = headers['www-authenticate']
+        
+				q1 = realm_string.find('"')
+				q2 = realm_string.find('"', q1+1)
+				realm = realm_string[q1+1:q2]
+        
+				self.realm = realm
+class HTTPRealmFinder:
+
+			def __init__(self, url):
+				self.url = url
+				scheme, domain, path, x1, x2, x3 = urlparse(url)
+        
+				handler = HTTPRealmFinderHandler()
+				handler.add_password(None, domain, 'foo', 'bar')
+				self.handler = handler
+        
+				opener = urllib2.build_opener(handler)
+				urllib2.install_opener(opener)
+
+			def ping(self, url):
+				try:
+					urllib2.urlopen(url)
+				except urllib2.HTTPError, e:
+					pass
+
+			def get(self):
+				self.ping(self.url)
+				try:
+					realm = self.handler.realm
+				except AttributeError:
+					realm = None
+        
+				return realm
+
+			def prt(self):
+				return self.get()
+
 def vcsgetxml(ip,username,password,request):
-	
-    
- 	URL = 'http://%s/%s' % (ip,request)
-	
-	realm=findRealm(ip,username,password,request)
-	
+	URL = 'https://%s/%s' % (ip,request)
+	realm=HTTPRealmFinder(URL)
+	realm=realm.prt()
 	ah = urllib2.HTTPDigestAuthHandler()
 	ah.add_password(realm,ip,username,password)
 	urllib2.install_opener(urllib2.build_opener(ah))
 	r = urllib2.Request(URL)
 	obj = urllib2.urlopen(r)
 	return obj.read()
+
 def vcsgetTraversalCalls(ip,username,password):
 	'''
 	   Returns a tulip (current,max,total)

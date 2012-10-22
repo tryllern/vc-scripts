@@ -258,6 +258,26 @@ if options.nontraversal:
     	print "Nontraversal calls:%s percent of %s in use " % (percent,licenses_nontrav)
     	exit(0)	
 				
-
+if options.registrations:
+      import math
+      
+      (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password,proto)
+      percent=(float(current)/float(licenses_reg))*100.0
+      percent=int(percent)
+      if percent > int(options.critical): 
+        print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
+        exit(2)
+      if options.warning :
+    	
+        if percent  >= int(options.warning):
+    		print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
+    		exit(1)
+        else:
+			print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
+			exit(0)	
+    	
+      else: 
+    	print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
+    	exit(0)	
 	
 exit(3)

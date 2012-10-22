@@ -5,7 +5,6 @@ import optparse
 from urlparse import urlparse
 from xml.dom.minidom import parseString
 
-
 '''
 Nagios script for VCS
 
@@ -205,79 +204,63 @@ if options.secure:
 else:
 	proto='http'
 
+
+# Getting license information
 (licenses_nontrav,licenses_trav,licenses_reg)=vcsgetCallLicenses(options.ip,options.username,options.password,proto)
 
-#
 # if the warning options is not defined, set it as the same as critical
-#
-
 if not options.warning: options.warning=options.critical
 
 
+def get_response(percent,licens,name):
+	'''
+	get_response(percent,licenses_nontrav,'Nontraversal calls')
+	
+	'''
+	response_text= "%s:%s percent of %s in use " % (name,percent,licens)
+	if percent > int(options.critical):  
+        
+		response_exitcode=2
+        
+	if options.warning :  
+    	
+		if percent  >= int(options.warning):
+    		
+			response_exitcode=1
+    		
+		else:
+			
+			response_exitcode=0	
+    	
+	else: 
+    	
+		response_exitcode=0
+	
+	return(response_exitcode,response_text)
+
+
 if options.traversal:
-      import math
-      
       (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password,proto)
       percent=(float(current)/float(licenses_trav))*100.0
       percent=int(percent)
-      if percent > int(options.critical):  
-        print "traversal calls:%s percent of %s in use " % (percent,licenses_trav)
-        exit(2)
-      if options.warning :  
-    	
-    	if percent  >= int(options.warning):
-    		print "traversal calls:%s percent of %s in use " % (percent,licenses_trav)
-    		exit(1)
-    	else:
-			print "traversal calls:%s percent of %s in use " % (percent,licenses_trav)
-    	exit(0)	
-    	
-      else: 
-    	print "traversal calls:%s percent of %s in use " % (percent,licenses_trav)
-    	exit(0)	
-
-if options.nontraversal:
-      import math
-      
+      (exitcode,output_text)=get_response(percent,licenses_trav,'Traversal calls')
+      print output_text
+      exit(exitcode)
+	   		
+if options.nontraversal:      
       (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password,proto)
       percent=(float(current)/float(licenses_nontrav))*100.0
       percent=int(percent)
-      if percent > int(options.critical): 
-        print "Nontraversal calls:%s percent of %s in use " % (percent,licenses_nontrav)
-        exit(2)
-      if options.warning :
-    	
-        if percent  >= int(options.warning):
-    		print "Nontraversal calls:%s percent of %s in use " % (percent,licenses_nontrav)
-    		exit(1)
-        else:
-			print "Nontraversal calls:%s percent of %s in use " % (percent,licenses_nontrav)
-			exit(0)	
-    	
-      else: 
-    	print "Nontraversal calls:%s percent of %s in use " % (percent,licenses_nontrav)
-    	exit(0)	
-				
+      (exitcode,output_text)=get_response(percent,licenses_trav,'Nontraversal calls')
+      print output_text
+      exit(exitcode)
+	   		
 if options.registrations:
-      import math
-      
       (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password,proto)
       percent=(float(current)/float(licenses_reg))*100.0
       percent=int(percent)
-      if percent > int(options.critical): 
-        print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
-        exit(2)
-      if options.warning :
-    	
-        if percent  >= int(options.warning):
-    		print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
-    		exit(1)
-        else:
-			print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
-			exit(0)	
-    	
-      else: 
-    	print "Registrations calls:%s percent of %s in use " % (percent,licenses_reg)
-    	exit(0)	
-	
+      (exitcode,output_text)=get_response(percent,licenses_trav,'Registrations')
+      print output_text
+      exit(exitcode)
+
 exit(3)

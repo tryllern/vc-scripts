@@ -217,12 +217,12 @@ if options.critical is None:
 if not options.warning: options.warning=options.critical
 
 
-def get_response(percent,licens,name):
+def get_response(percent,licens,current,name):
 	'''
-	get_response(percent,licenses_nontrav,'Nontraversal calls')
+	get_response(percent,licenses_nontrav,current,'Nontraversal calls')
 	
 	'''
-	response_text= "%s:%s percent of %s in use " % (name,percent,licens)
+	response_text= "%s:%s percent (%s of %s in use) " % (name,percent,current,licens)
 	if percent > int(options.critical):  
         
 		response_exitcode=2
@@ -246,25 +246,39 @@ def get_response(percent,licens,name):
 
 if options.traversal:
       (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password)
-      percent=(float(current)/float(licenses_trav))*100.0
+      if current !=0:
+      	percent=(float(current)/float(licenses_trav))*100.0
+      else:
+	precent=0
+
       percent=int(percent)
-      (exitcode,output_text)=get_response(percent,licenses_trav,'Traversal calls')
+      (exitcode,output_text)=get_response(percent,licenses_trav,current,'Traversal calls')
       print output_text
       exit(exitcode)
 	   		
 if options.nontraversal:      
       (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password)
-      percent=(float(current)/float(licenses_nontrav))*100.0
+      if current!=0:
+      	percent=(float(current)/float(licenses_nontrav))*100.0
+      else:
+	      percent=0
       percent=int(percent)
-      (exitcode,output_text)=get_response(percent,licenses_nontrav,'Nontraversal calls')
+      (exitcode,output_text)=get_response(percent,licenses_nontrav,current,'Nontraversal calls')
       print output_text
       exit(exitcode)
 	   		
 if options.registrations:
       (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password)
-      percent=(float(current)/float(licenses_reg))*100.0
+      
+      if current !=0:
+      
+	      percent=(float(current)/float(licenses_reg))*100.0
+      
+      else:
+	      percent=0
+
       percent=int(percent)
-      (exitcode,output_text)=get_response(percent,licenses_reg,'Registrations')
+      (exitcode,output_text)=get_response(percent,licenses_reg,current,'Registrations')
       print output_text
       exit(exitcode)
 

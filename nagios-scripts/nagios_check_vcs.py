@@ -249,7 +249,7 @@ if options.traversal:
       if int(current) !=0:
       	percent=(float(current)/float(licenses_trav))*100.0
       else:
-	precent=0
+	percent=0
 
       percent=int(percent)
       (exitcode,output_text)=get_response(percent,licenses_trav,current,'Traversal calls')

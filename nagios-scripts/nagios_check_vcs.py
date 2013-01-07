@@ -246,7 +246,7 @@ def get_response(percent,licens,current,name):
 
 if options.traversal:
       (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password)
-      if current !=0:
+      if int(current) !=0:
       	percent=(float(current)/float(licenses_trav))*100.0
       else:
 	precent=0
@@ -258,7 +258,7 @@ if options.traversal:
 	   		
 if options.nontraversal:      
       (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password)
-      if current!=0:
+      if int(current)!=0:
       	percent=(float(current)/float(licenses_nontrav))*100.0
       else:
 	      percent=0
@@ -270,7 +270,7 @@ if options.nontraversal:
 if options.registrations:
       (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password)
       
-      if current !=0:
+      if int(current) !=0:
       
 	      percent=(float(current)/float(licenses_reg))*100.0
       

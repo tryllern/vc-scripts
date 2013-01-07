@@ -256,7 +256,7 @@ if options.nontraversal:
       (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password)
       percent=(float(current)/float(licenses_nontrav))*100.0
       percent=int(percent)
-      (exitcode,output_text)=get_response(percent,licenses_trav,'Nontraversal calls')
+      (exitcode,output_text)=get_response(percent,licenses_nontrav,'Nontraversal calls')
       print output_text
       exit(exitcode)
 	   		
@@ -264,7 +264,7 @@ if options.registrations:
       (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password)
       percent=(float(current)/float(licenses_reg))*100.0
       percent=int(percent)
-      (exitcode,output_text)=get_response(percent,licenses_trav,'Registrations')
+      (exitcode,output_text)=get_response(percent,licenses_reg,'Registrations')
       print output_text
       exit(exitcode)
 

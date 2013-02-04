@@ -4,14 +4,15 @@ import re
 import urllib2
 import optparse
 import mechanize
-from urlparse import urlparse
+import cookielib
+#from urlparse import urlparse
 
 
 
 class vcsCluster():
 	
 	
-	def __init__(ip,username,password):
+	def __init__(self,ip,username,password):
 		self.ip=ip
 		self.username=username
 		self.password=password
@@ -21,16 +22,26 @@ class vcsCluster():
 
 	def _vcsgetCluster(self):
 	
-		URL = 'https://%s/login' % (ip)
-		
+		URL = 'https://%s/login' % (self.ip)
+		cj=cookielib.LWPCookieJar()
+
 		mech = mechanize.Browser()
-		mech.open(URL)
+		#mech.set_debug_http(True)
+                mech.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+                mech.set_handle_refresh( mechanize._http.HTTPRefreshProcessor(), max_time=1 )
+
+                
+                mech.set_cookiejar(cj)
+                mech.set_handle_redirect(True)
+                mech.set_handle_robots(False)
+                mech.set_handle_referer(True)
+                mech.open(URL)
 		mech.select_form(nr=1)
 		mech["username"] = self.username
 		mech["password"] = self.password
-		results = mech.submit().read()
+	        mech.submit().read()
 		
-		URL='https://%s/resourceusage"' % (ip)
+		URL='https://%s/resourceusage' % (self.ip)
 		self.html=mech.open(URL).read()
 		
 
@@ -98,10 +109,10 @@ class vcsCluster():
 		self.registration_limit=regex.search(tmp1_start).group(1)
 	
 		# percent
-		self.registration_percent=self.percent(self.registration_current,self.registration_limit)
+		self.registration_percent=self.percent( self.registration_current, self.registration_limit)
 		
 		
-	def percent(current,maximum):
+	def percent(self,current,maximum):
 		# <current> = current calls
 		# <maximum> = maximum availabel calls
 		
@@ -169,7 +180,7 @@ def check(current,peak,limit,percent):
 	# Returns (int(exitcode),str(text))
 	#
 	
-	text='current:%s max:%s licenses:%s percent:' % (current,peak,limit,percent)
+	text='current:%s max:%s licenses:%s percent:%s' % (current,peak,limit,percent)
 	
 	#  **** Critical check START ****
 	if options.critical.find('%') !=-1:
@@ -229,6 +240,6 @@ if options.nontraversal:
 if options.registrations:
 	
 	client.Registrations()
-	(exitcode,text)=check(client.registration_current,client.registration_peak,client.registration_limit)
+	(exitcode,text)=check( client.registration_current, client.registration_peak, client.registration_limit ,client.registration_percent)
 	print text
 	exit(exitcode)

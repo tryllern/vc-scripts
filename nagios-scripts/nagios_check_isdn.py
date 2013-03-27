@@ -98,15 +98,15 @@ if isdn_Available_Channels==0.1:
 	isdn_Available_Channels=0
 	
 if percent_active_ports > int(options.critical):  
-  print "%i ISDN Channels(%s percent) of %s in use " % (ports_in_use,percent_active_ports,isdn_Available_Channels)
+  print "%i ISDN Channels(%s percent) of %s in use | Current=%s" % (ports_in_use,percent_active_ports,isdn_Available_Channels,ports_in_use)
   exit(2)
 
 if options.warning:  
   if percent_active_ports  > int(options.warning):
-    print "%i ISDN Channels(%s percent) of %s in use " % (ports_in_use,percent_active_ports,isdn_Available_Channels)
+    print "%i ISDN Channels(%s percent) of %s in use |Current=%s" % (ports_in_use,percent_active_ports,isdn_Available_Channels,ports_in_use)
     exit(1)
   else:
-     print "%i ISDN Channels(%s percent) of %s in use " % (ports_in_use,percent_active_ports,isdn_Available_Channels)
+     print "%i ISDN Channels(%s percent) of %s in use |Current=%s" % (ports_in_use,percent_active_ports,isdn_Available_Channels,ports_in_use)
      exit(0)	
     	
 exit(3)

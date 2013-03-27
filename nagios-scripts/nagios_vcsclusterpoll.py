@@ -4,6 +4,7 @@ import re
 import urllib2
 import optparse
 import mechanize
+import cookielib
 from urlparse import urlparse
 
 
@@ -11,7 +12,7 @@ from urlparse import urlparse
 class vcsCluster():
 	
 	
-	def __init__(ip,username,password):
+	def __init__(self,ip,username,password):
 		self.ip=ip
 		self.username=username
 		self.password=password
@@ -21,21 +22,45 @@ class vcsCluster():
 
 	def _vcsgetCluster(self):
 	
-		URL = 'https://%s/login' % (ip)
-		
+		URL = 'https://%s/login' % (self.ip)
+		cj=cookielib.LWPCookieJar()
 		mech = mechanize.Browser()
-		mech.open(URL)
+		mech.set_cookiejar(cj)
+		mech.set_handle_robots(False)
+		#mech.set_debug_http(True)
+		#mech.set_debug_responses(True)
+		#mech.set_debug_redirects(True)
+		mech.set_handle_redirect(True)
+		mech.set_handle_referer(True)
+		mech.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+		mech.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+		#print "Opening login page"
+		self.html=mech.open(URL).read()
+		#print self.html
+		#print "Selecting Form 1"
 		mech.select_form(nr=1)
 		mech["username"] = self.username
 		mech["password"] = self.password
-		results = mech.submit().read()
-		
-		URL='https://%s/resourceusage"' % (ip)
+		#print "Debug:: Passing form to server"
+		#results = mech.submit().read()
+		#print results
+		#URL='https://%s/resourceusage"' % (self.ip)
+		URL='https://%s/resourceusage' % (self.ip)
+
 		self.html=mech.open(URL).read()
 		
 
 
-	def Nontraversal(self):
+	def percent(current,maximum):
+		# <current> = current calls
+		# <maximum> = maximum availabel calls
+		
+		
+		return (int((float(current)/float(maximum)))*100.0)
+		
+        
+        
+        def Nontraversal(self):
 		html=self.html
 		tmp1_start=html[html.find("Non-traversal call licenses"):]
 
@@ -54,7 +79,7 @@ class vcsCluster():
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.nontraversal_limit=regex.search(tmp1_start).group(1)
 
-		self.nontraversal_percent=percent(self.nontraversal_current,self.nontraversal_limit)
+		self.nontraversal_percent=self.percent(self.nontraversal_current,self.nontraversal_limit)
 
 	def Traversal(self):
 		html=self.html
@@ -74,7 +99,7 @@ class vcsCluster():
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.traversal_limit=regex.search(tmp1_start).group(1)
 
-		this.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
+		self.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
 		
 		
 	def Registrations(self): 
@@ -84,7 +109,7 @@ class vcsCluster():
 
 		# Current
 
-		regex=re.compile(".+Current<\/td><td><b>(\d+)</b><\/td>")
+		regex=re.compile(".+Current</td><td><b>(\d+)</b></td>.*")
 		self.registration_current=regex.search(tmp1_start).group(1)
 
 		# Peak
@@ -101,13 +126,7 @@ class vcsCluster():
 		self.registration_percent=self.percent(self.registration_current,self.registration_limit)
 		
 		
-	def percent(current,maximum):
-		# <current> = current calls
-		# <maximum> = maximum availabel calls
-		
-		
-		return (int((float(current)/float(maximum)))*100.0)
-		
+	
 
 
 
@@ -171,19 +190,7 @@ def check(current,peak,limit,percent):
 	
 	text='current:%s max:%s licenses:%s percent:' % (current,peak,limit,percent)
 	
-	#  **** Critical check START ****
-	if options.critical.find('%') !=-1:
-		if int(percent) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)						
 		
-	if options.critical.find('%') ==-1:
-		if int(current) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)
-#  **** Critical check STOP ****
-	
-	
 # **** Warning check START  ****
 	if options.warning:
 			# check if the percent sign is present in the warning option, if it is (find does not return -1)
@@ -210,6 +217,18 @@ def check(current,peak,limit,percent):
 			
 
 # **** Warning check STOP  ****
+#  **** Critical check START ****
+	if options.critical.find('%') !=-1:
+		if int(percent) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)						
+		
+	if options.critical.find('%') ==-1:
+		if int(current) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)
+#  **** Critical check STOP ****
+	
 
 
 if options.traversal:

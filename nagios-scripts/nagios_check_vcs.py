@@ -222,10 +222,7 @@ def get_response(percent,licens,current,name):
 	get_response(percent,licenses_nontrav,current,'Nontraversal calls')
 	
 	'''
-	response_text= "%s:%s percent (%s of %s in use) " % (name,percent,current,licens)
-	if percent > int(options.critical):  
-        
-		response_exitcode=2
+	response_text= "%s:%s percent (%s of %s in use)|Current=%s" % (name,percent,current,licens,name,current)
         
 	if options.warning :  
     	
@@ -240,7 +237,14 @@ def get_response(percent,licens,current,name):
 	else: 
     	
 		response_exitcode=0
-	
+        
+        # owerwrite response_exitcode if cirtical,
+        
+        if percent > int(options.critical):  
+        
+		response_exitcode=2
+        
+
 	return(response_exitcode,response_text)
 
 

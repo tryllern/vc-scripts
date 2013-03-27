@@ -9,7 +9,7 @@ shows percentage in use and performance data
 import xmlrpclib
 import optparse	
 import urllib2
-from urlparse import urlparse
+#from urlparse import urlparse
 from xml.dom.minidom import parseString
 import math  # math.floor()
 

@@ -5,11 +5,9 @@ import urllib2
 import optparse
 import mechanize
 import cookielib
-<<<<<<< HEAD
+
 from urlparse import urlparse
-=======
 #from urlparse import urlparse
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 
 
@@ -28,7 +26,6 @@ class vcsCluster():
 	
 		URL = 'https://%s/login' % (self.ip)
 		cj=cookielib.LWPCookieJar()
-<<<<<<< HEAD
 		mech = mechanize.Browser()
 		mech.set_cookiejar(cj)
 		mech.set_handle_robots(False)
@@ -52,7 +49,6 @@ class vcsCluster():
 		#URL='https://%s/resourceusage"' % (self.ip)
 		URL='https://%s/resourceusage' % (self.ip)
 
-=======
 
 		mech = mechanize.Browser()
 		#mech.set_debug_http(True)
@@ -71,7 +67,6 @@ class vcsCluster():
 	        mech.submit().read()
 		
 		URL='https://%s/resourceusage' % (self.ip)
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 		self.html=mech.open(URL).read()
 		
 
@@ -101,16 +96,13 @@ class vcsCluster():
 		# License limit
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.nontraversal_limit=regex.search(tmp1_start).group(1)
-<<<<<<< HEAD
 
 		self.nontraversal_percent=self.percent(self.nontraversal_current,self.nontraversal_limit)
-=======
                 
                 #Percent
 		self.nontraversal_percent=self.percent(
                         self.nontraversal_current,self.nontraversal_limit
                         )
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 	def Traversal(self):
 		html=self.html
@@ -129,13 +121,10 @@ class vcsCluster():
 		# License limit
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.traversal_limit=regex.search(tmp1_start).group(1)
-<<<<<<< HEAD
 
 		self.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
-=======
                 # Percent
                 self.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 		
 		
 	def Registrations(self): 
@@ -164,9 +153,7 @@ class vcsCluster():
                         )
 		
 		
-<<<<<<< HEAD
 	
-=======
 	def percent(self,current,maximum):
 		# <current> = current calls
 		# <maximum> = maximum availabel calls
@@ -178,7 +165,6 @@ class vcsCluster():
                     return (int((float(current)/float(maximum)))*100.0)
 	        
                     
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 
 
@@ -243,24 +229,8 @@ def check(current,peak,limit,percent):
 	text='current:%s max:%s licenses:%s percent:%s' % (str(current),
                 str(peak),str(limit),str(percent))
 	
-<<<<<<< HEAD
 		
-=======
-	#  **** Critical check START ****
-	if options.critical.find('%') !=-1:
-		if int(percent) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)	
-
-        else:
-        #if options.critical.find('%') ==-1:
-		if int(current) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)
-#  **** Critical check STOP ****
-	
-	
->>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
+		
 # **** Warning check START  ****
 	if options.warning:
 	    # check if the percent sign is present in the warning option, 
@@ -286,24 +256,24 @@ def check(current,peak,limit,percent):
 		else: 
 		    exitcode=int(0)
 		    return(exitcode,text)
+		#  **** Critical check START ****
+	if options.critical.find('%') !=-1:
+		if int(percent) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)	
+
+        else:
+        #if options.critical.find('%') ==-1:
+		if int(current) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)
+#  **** Critical check STOP ****
 			
 
 #if all else fails...
         return (0,text)
 
 
-# **** Warning check STOP  ****
-#  **** Critical check START ****
-	if options.critical.find('%') !=-1:
-		if int(percent) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)						
-		
-	if options.critical.find('%') ==-1:
-		if int(current) > int(options.critical):
-			exitcode=int(2)
-			return(exitcode,text)
-#  **** Critical check STOP ****
 	
 
 exitcode=0

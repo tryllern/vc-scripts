@@ -5,7 +5,11 @@ import urllib2
 import optparse
 import mechanize
 import cookielib
+<<<<<<< HEAD
 from urlparse import urlparse
+=======
+#from urlparse import urlparse
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 
 
@@ -24,6 +28,7 @@ class vcsCluster():
 	
 		URL = 'https://%s/login' % (self.ip)
 		cj=cookielib.LWPCookieJar()
+<<<<<<< HEAD
 		mech = mechanize.Browser()
 		mech.set_cookiejar(cj)
 		mech.set_handle_robots(False)
@@ -47,6 +52,26 @@ class vcsCluster():
 		#URL='https://%s/resourceusage"' % (self.ip)
 		URL='https://%s/resourceusage' % (self.ip)
 
+=======
+
+		mech = mechanize.Browser()
+		#mech.set_debug_http(True)
+                mech.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+                mech.set_handle_refresh( mechanize._http.HTTPRefreshProcessor(), max_time=1 )
+
+                
+                mech.set_cookiejar(cj)
+                mech.set_handle_redirect(True)
+                mech.set_handle_robots(False)
+                mech.set_handle_referer(True)
+                mech.open(URL)
+		mech.select_form(nr=1)
+		mech["username"] = self.username
+		mech["password"] = self.password
+	        mech.submit().read()
+		
+		URL='https://%s/resourceusage' % (self.ip)
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 		self.html=mech.open(URL).read()
 		
 
@@ -68,18 +93,24 @@ class vcsCluster():
 
 		regex=re.compile(".+Current<\/td><td><b>(\d+)</b><\/td>")
 		self.nontraversal_current=regex.search(tmp1_start).group(1)
-
 		# Peak
 
 		regex=re.compile(".+Peak<\/td><td><b>(\d+)</b><\/td>")
 		self.nontraversal_peak=regex.search(tmp1_start).group(1)
 
-
 		# License limit
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.nontraversal_limit=regex.search(tmp1_start).group(1)
+<<<<<<< HEAD
 
 		self.nontraversal_percent=self.percent(self.nontraversal_current,self.nontraversal_limit)
+=======
+                
+                #Percent
+		self.nontraversal_percent=self.percent(
+                        self.nontraversal_current,self.nontraversal_limit
+                        )
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 	def Traversal(self):
 		html=self.html
@@ -98,8 +129,13 @@ class vcsCluster():
 		# License limit
 		regex=re.compile(".+License limit<\/td><td><b>(\d+)</b><\/td>")
 		self.traversal_limit=regex.search(tmp1_start).group(1)
+<<<<<<< HEAD
 
 		self.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
+=======
+                # Percent
+                self.traversal_percent=self.percent(self.traversal_current,self.traversal_limit)
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 		
 		
 	def Registrations(self): 
@@ -123,10 +159,26 @@ class vcsCluster():
 		self.registration_limit=regex.search(tmp1_start).group(1)
 	
 		# percent
-		self.registration_percent=self.percent(self.registration_current,self.registration_limit)
+		self.registration_percent=self.percent( 
+                        self.registration_current, self.registration_limit
+                        )
 		
 		
+<<<<<<< HEAD
 	
+=======
+	def percent(self,current,maximum):
+		# <current> = current calls
+		# <maximum> = maximum availabel calls
+		
+                if  int(current)==0 :
+		    return 0
+                
+                else:
+                    return (int((float(current)/float(maximum)))*100.0)
+	        
+                    
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 
 
 
@@ -188,33 +240,57 @@ def check(current,peak,limit,percent):
 	# Returns (int(exitcode),str(text))
 	#
 	
-	text='current:%s max:%s licenses:%s percent:' % (current,peak,limit,percent)
+	text='current:%s max:%s licenses:%s percent:%s' % (str(current),
+                str(peak),str(limit),str(percent))
 	
+<<<<<<< HEAD
 		
+=======
+	#  **** Critical check START ****
+	if options.critical.find('%') !=-1:
+		if int(percent) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)	
+
+        else:
+        #if options.critical.find('%') ==-1:
+		if int(current) > int(options.critical):
+			exitcode=int(2)
+			return(exitcode,text)
+#  **** Critical check STOP ****
+	
+	
+>>>>>>> 5426d14faf89c6e9db0ddced689b70fe08bffc3c
 # **** Warning check START  ****
 	if options.warning:
-			# check if the percent sign is present in the warning option, if it is (find does not return -1)
-			if options.warning.find('%') !=-1:
+	    # check if the percent sign is present in the warning option, 
+            #if it is (find does not return -1)
+	    if options.warning.find('%') !=-1:
 				
-				if int(percent) > int(options.warning):
-					exitcode=int(1)
-					return(exitcode,text)
+		if int(percent) > int(options.warning):
+			exitcode=int(1)
+			return(exitcode,text)
 				
-				else: 
-					exitcode=int(0)
-					return(exitcode,text)
+		else: 
+			exitcode=int(0)
+			return(exitcode,text)
 				
-			#if the percent sign is not present in the warning option don't check percent	
-			if options.warning.find('%') ==-1:
-				
-				if int(current) > int(options.warning):
-					exitcode=int(1)
-					return(exitcode,text)
+			#if the percent sign is not present in the warning 
+                        #option don't check percent	
+		if options.warning.find('%') ==-1:
+		
+		    if int(current) > int(options.warning):
+			exitcode=int(1)
+			return(exitcode,text)
 					
-				else: 
-					exitcode=int(0)
-					return(exitcode,text)
+		else: 
+		    exitcode=int(0)
+		    return(exitcode,text)
 			
+
+#if all else fails...
+        return (0,text)
+
 
 # **** Warning check STOP  ****
 #  **** Critical check START ****
@@ -230,24 +306,33 @@ def check(current,peak,limit,percent):
 #  **** Critical check STOP ****
 	
 
+exitcode=0
+text=''
 
 if options.traversal:
 	
 	client.Traversal()
-	(exitcode,text)=check(client.traversal_current,client.traversal_peak,client.traversal_limit,client.traversal_percent)
+        (exitcode,text)=check(client.traversal_current,
+                client.traversal_peak,client.traversal_limit,
+                client.traversal_percent)
 	print text
 	exit(exitcode)
 			
 if options.nontraversal:
 	
 	client.Nontraversal()
-	(exitcode,text)=check(client.nontraversal_current,client.nontraversal_peak,client.nontraversal_limit)
+        (exitcode,text)=check(client.nontraversal_current,
+                 client.nontraversal_peak, 
+                client.nontraversal_limit, 
+                client.nontraversal_percent )
 	print text
 	exit(exitcode)
 
 if options.registrations:
 	
 	client.Registrations()
-	(exitcode,text)=check(client.registration_current,client.registration_peak,client.registration_limit)
+	(exitcode,text)=check( client.registration_current, 
+                client.registration_peak, 
+                client.registration_limit ,client.registration_percent)
 	print text
 	exit(exitcode)

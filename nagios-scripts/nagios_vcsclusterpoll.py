@@ -6,7 +6,7 @@ import optparse
 import mechanize
 import cookielib
 
-from urlparse import urlparse
+#from urlparse import urlparse
 #from urlparse import urlparse
 
 
@@ -29,29 +29,18 @@ class vcsCluster():
 		mech = mechanize.Browser()
 		mech.set_cookiejar(cj)
 		mech.set_handle_robots(False)
-		#mech.set_debug_http(True)
-		#mech.set_debug_responses(True)
-		#mech.set_debug_redirects(True)
 		mech.set_handle_redirect(True)
 		mech.set_handle_referer(True)
 		mech.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
 		mech.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
-		#print "Opening login page"
 		self.html=mech.open(URL).read()
-		#print self.html
-		#print "Selecting Form 1"
 		mech.select_form(nr=1)
 		mech["username"] = self.username
 		mech["password"] = self.password
-		#print "Debug:: Passing form to server"
-		#results = mech.submit().read()
-		#print results
-		#URL='https://%s/resourceusage"' % (self.ip)
 		URL='https://%s/resourceusage' % (self.ip)
 
 
 		mech = mechanize.Browser()
-		#mech.set_debug_http(True)
                 mech.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
                 mech.set_handle_refresh( mechanize._http.HTTPRefreshProcessor(), max_time=1 )
 
@@ -71,14 +60,6 @@ class vcsCluster():
 		
 
 
-	def percent(current,maximum):
-		# <current> = current calls
-		# <maximum> = maximum availabel calls
-		
-		
-		return (int((float(current)/float(maximum)))*100.0)
-		
-        
         
         def Nontraversal(self):
 		html=self.html
@@ -226,8 +207,8 @@ def check(current,peak,limit,percent):
 	# Returns (int(exitcode),str(text))
 	#
 	
-	text='current:%s max:%s licenses:%s percent:%s' % (str(current),
-                str(peak),str(limit),str(percent))
+	text='current:%s max:%s licenses:%s percent:%s | Current=%s' % (str(current),
+                str(peak),str(limit),str(percent),str(current) )
 	
 		
 		

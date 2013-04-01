@@ -222,7 +222,7 @@ def get_response(percent,licens,current,name):
 	get_response(percent,licenses_nontrav,current,'Nontraversal calls')
 	
 	'''
-	response_text= "%s:%s percent (%s of %s in use)|Current=%s" % (name,percent,current,licens,name,current)
+	response_text= "%s:%s percent (%s of %s in use)|Current=%s" % (name,percent,current,licens,current)
         
 	if options.warning :  
     	

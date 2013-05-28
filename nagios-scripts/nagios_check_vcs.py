@@ -60,24 +60,15 @@ class HTTPRealmFinder:
 			def prt(self):
 				return self.get()
 
-def vcsgetxml(ip,username,password,request):
+def vcsgetxml(ip,username,password,request,request_type='https'):
 	
 	
 	try:
-		
-		URL = 'https://%s/%s' % (ip,request)
-		realm=HTTPRealmFinder(URL)
-		realm=realm.prt()
-		ah = urllib2.HTTPBasicAuthHandler()
-		ah.add_password(realm,ip,username,password)
-		urllib2.install_opener(urllib2.build_opener(ah))
-		r = urllib2.Request(URL)
-		obj = urllib2.urlopen(r)
-		return obj.read()
-	
-	
-	except urllib2.HTTPError:
-		URL = 'http://%s/%s' % (ip,request)
+		if request_type=='https':
+			URL = 'https://%s/%s' % (ip,request)
+		else:
+			URL = 'http://%s/%s' % (ip,request)
+			
 		realm=HTTPRealmFinder(URL)
 		realm=realm.prt()
 		ah = urllib2.HTTPDigestAuthHandler()
@@ -88,77 +79,93 @@ def vcsgetxml(ip,username,password,request):
 		return obj.read()
 	
 	
+	except:
+	
+		if request_type=='https':
+			URL = 'https://%s/%s' % (ip,request)
+		else:
+			URL = 'http://%s/%s' % (ip,request)
+		realm=HTTPRealmFinder(URL)
+		realm=realm.prt()
+		ah = urllib2.HTTPBasicAuthHandler()
+		ah.add_password(realm,ip,username,password)
+		urllib2.install_opener(urllib2.build_opener(ah))
+		r = urllib2.Request(URL)
+		obj = urllib2.urlopen(r)
+		return obj.read()
+		
 	
 	
-def vcsgetTraversalCalls(ip,username,password):
+	
+def vcsgetTraversalCalls(ip,username,password,request_type='https'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Calls/Traversal'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,request_type)
 	#return xmlResponse
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetNonTraversalCalls(ip,username,password):
+def vcsgetNonTraversalCalls(ip,username,password,request_type='https'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Calls/NonTraversal'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,request_type)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetRegistrations(ip,username,password):
+def vcsgetRegistrations(ip,username,password,request_type='https'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/Registrations'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,request_type)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetTURN(ip,username,password):
+def vcsgetTURN(ip,username,password,request_type='https'):
 	'''
 	   Returns a tulip (current,max,total)
 	
 	'''
 	url='getxml?location=/Status/ResourceUsage/TURN/Relays'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,request_type)
 	
 	dom = parseString(xmlResponse)
 	Current=  dom.getElementsByTagName('Current')[0]._get_firstChild().toprettyxml().rstrip()
 	Max= dom.getElementsByTagName('Max')[0]._get_firstChild().toprettyxml().rstrip()
 	Total=dom.getElementsByTagName('Total')[0]._get_firstChild().toprettyxml().rstrip()
 	return (Current,Max,Total)
-def vcsgetUptime(ip,username,password):
+def vcsgetUptime(ip,username,password,request_type='https'):
 	'''
 	Uptime: <Time in seconds>
 	'''
 	
 	url='getxml?location=/Status/SystemUnit/Uptime'
-	xmlResponse= vcsgetxml(ip,username,password,url)
+	xmlResponse= vcsgetxml(ip,username,password,url,request_type)
 	dom = parseString(xmlResponse)
 	uptime=dom.getElementsByTagName('Uptime')[0]._get_firstChild().toprettyxml().rstrip()
 	return uptime
-def vcsgetCallLicenses(ip,username,password):
+def vcsgetCallLicenses(ip,username,password,request_type='https'):
 	'''
 	Returns a tuple of Nontraversal,traversal,registration
 	'''
 	
 	url='getxml?location=/Status/SystemUnit/Software/Configuration'
-	resp= vcsgetxml(ip,username,password,url)
+	resp= vcsgetxml(ip,username,password,url,request_type)
 	
 	dom = parseString(resp)
 	Nontraversal= dom.getElementsByTagName('NonTraversalCalls')[0]._get_firstChild().toprettyxml().rstrip()
@@ -181,6 +188,7 @@ p.add_option("--nontraversal",dest='nontraversal',help='Get Non Traversal calls 
 p.add_option("--registrations",dest="registrations",help="Get Registrations info",action="store_const", const=1)
 p.add_option("-w",dest='warning',help='Warning level')
 p.add_option("-c",dest='critical',help='Critical level')
+p.add_option("--http",dest="proto",action='store_true',default=False,help="Froce to http, default is https")
 options, arguments = p.parse_args()
 
 if len(arguments) >= 1:
@@ -208,10 +216,13 @@ if options.critical is None:
 	p.print_help()
 	exit(3)
 
-
+if options.proto:
+	request_type="http"
+else:
+	request_type="https"
 
 # Getting license information
-(licenses_nontrav,licenses_trav,licenses_reg)=vcsgetCallLicenses(options.ip,options.username,options.password)
+(licenses_nontrav,licenses_trav,licenses_reg)=vcsgetCallLicenses(options.ip,options.username,options.password,request_type)
 
 # if the warning options is not defined, set it as the same as critical
 if not options.warning: options.warning=options.critical
@@ -249,7 +260,7 @@ def get_response(percent,licens,current,name):
 
 
 if options.traversal:
-      (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password)
+      (current,max,total)=vcsgetTraversalCalls(options.ip,options.username,options.password,request_type)
       if int(current) !=0:
       	percent=(float(current)/float(licenses_trav))*100.0
       else:
@@ -261,7 +272,7 @@ if options.traversal:
       exit(exitcode)
 	   		
 if options.nontraversal:      
-      (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password)
+      (current,max,total)=vcsgetNonTraversalCalls(options.ip,options.username,options.password,request_type)
       if int(current)!=0:
       	percent=(float(current)/float(licenses_nontrav))*100.0
       else:
@@ -272,7 +283,7 @@ if options.nontraversal:
       exit(exitcode)
 	   		
 if options.registrations:
-      (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password)
+      (current,max,total)=vcsgetRegistrations(options.ip,options.username,options.password,request_type)
       
       if int(current) !=0:
       

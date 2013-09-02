@@ -4,8 +4,6 @@ import re
 import optparse
 
 
-
-# Start option parsing
 p = optparse.OptionParser()
 p.add_option('-i',dest="ip",metavar="<address>",help='address to vcs, ip or dns name')
 p.add_option('-u',dest="username",metavar="<username>",help='Username for the vcs' )
@@ -15,32 +13,29 @@ p.add_option('--system',dest='system',metavar='',help='Gets the system licenses 
 
 options, arguments = p.parse_args()
 if len(arguments) >= 1:
-	p.error("incorrect number of arguments")
+    p.error("incorrect number of arguments")
 
 # Check if -i -u -p is commited
 if options.ip is None:
-	print '\n\nERROR -i is manditory\n\n'
-	p.print_help()
-	exit(-1)
+    print '\n\nERROR -i is manditory\n\n'
+    p.print_help()
+    exit(-1)
 if options.username is None:
-	print '\n\nERROR -u is manditory\n\n'
-	p.print_help()
-	exit(-1)
+    print '\n\nERROR -u is manditory\n\n'
+    p.print_help()
+    exit(-1)
 if options.password is None:
-	print '\n\nERROR -p is manditory\n\n'
-	p.print_help()
-	exit(-1)
+    print '\n\nERROR -p is manditory\n\n'
+    p.print_help()
+    exit(-1)
 
 if options.movi !=None and options.system !=None:
-	print "You have to make a choice man, you can't choose to show both the movi and the system licenses..."
-	p.print_help()
-	exit(-1)
+    print "You have to make a choice man, you can't choose to show both the movi and the system licenses..."
+    p.print_help()
+    exit(-1)
 
-# Stop options parsing
 
 net_address=options.ip
-
-# Authentication
 
 password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 top_level_url = "http://" +net_address+"/tms/default.aspx?pageId=35"
@@ -53,78 +48,22 @@ response = urllib2.urlopen(top_level_url)
 html = response.read()
 
 
-#################################
-#	Available Movi Licenses:
-##################################
-
-# the regex
-regex=re.compile('ctl00_uxContent_ctl01_uxTotalMoviLicenses">(\d+)')
-
-# narrow it down to the available movi licenses field
-html2=html[html.find('ctl00_uxContent_ctl01_uxTotalMoviLicenses'):]
-html3=html2[:html2.find('</span>')]
-
-# extracts the data and puts it in a var
-svar=regex.search(html3)
-total_movi_lic=svar.group(1)
-
-
-
-#################################
-#	Total Movi Licenses:
-#################################
-
-# the regex
-regex=re.compile('ctl00_uxContent_ctl01_uxAvailableMoviLicenses">(\d+)')
-
-# narrow it down to the available movi licenses field
-html2=html[html.find('ctl00_uxContent_ctl01_uxAvailableMoviLicenses'):]
-html3=html2[:html2.find('</span>')]
-
-# extracts the data and puts it in a var
-svar=regex.search(html3)
-avail_movi_lic=svar.group(1)
-
-
-#################################
-#	Total System Licenses:
-#################################
-
-# the regex
-regex=re.compile('ctl00_uxContent_ctl01_uxTotalSystemLicenses">(\d+)')
-
-# narrow it down to the available movi licenses field
-html2=html[html.find('ctl00_uxContent_ctl01_uxTotalSystemLicenses'):]
-html3=html2[:html2.find('</span>')]
-
-# extracts the data and puts it in a var
-svar=regex.search(html3)
-total_system_lic=svar.group(1)
-
-
-
-#################################
-#	Available System Licenses:
-#################################
-
-# the regex
-regex=re.compile('ctl00_uxContent_ctl01_uxAvailableSystemLicenses">(\d+)')
-
-# narrow it down to the available movi licenses field
-html2=html[html.find('ctl00_uxContent_ctl01_uxAvailableSystemLicenses'):]
-html3=html2[:html2.find('</span>')]
-
-# extracts the data and puts it in a var
-svar=regex.search(html3)
-avail_system_lic=svar.group(1)
-
-
-
-
 if options.movi is not None:
+    regex=re.compile('<span id="ctl00_uxContent_ctl01_uxTotalProvisioningLicenses" class="textbox">(\d+)</span>')
+    total_movi_lic=regex.search(html).group(1)
+    
+    regex=re.compile('<span id="ctl00_uxContent_ctl01_uxAvailableProvisioningLicenses" class="textbox">(\d+)</span>')
+    avail_movi_lic=regex.search(html).group(1)
 
-	print "Avail:%s Total:%s Use:%i" %(avail_movi_lic,total_movi_lic,(int(total_movi_lic)-int(avail_movi_lic)))
-	exit(0)
+    print "Avail:%s Total:%s Use:%i" %(avail_movi_lic,total_movi_lic,(int(total_movi_lic)-int(avail_movi_lic)))
+    exit(0)
 
 if options.system is not None:
-		print "Avail:%s Total:%s Use:%i" %(avail_system_lic,total_system_lic,(int(total_system_lic)-int(avail_system_lic)))
+    regex=re.compile('<span id="ctl00_uxContent_ctl01_uxTotalSystemLicenses" class="textbox">(\d+)</span>')
+    total_system_lic=regex.search(html).group(1)
+
+    regex=re.compile('<span id="ctl00_uxContent_ctl01_uxAvailableSystemLicenses" class="textbox">(\d+)</span>')
+    avail_system_lic=regex.search(html).group(1)
+            
+    print "Avail:%s Total:%s Use:%i" %(avail_system_lic,total_system_lic,(int(total_system_lic)-int(avail_system_lic)))
+    exit(0)

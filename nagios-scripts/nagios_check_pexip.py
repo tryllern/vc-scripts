@@ -64,7 +64,6 @@ active_conferences=requests.get("https://"+options.ip+"/api/admin/status/v1/conf
 # loop through all the conferences and count the perticipants
 counter=0
 for conf in json.loads(active_conferences.text)['objects']:
-    print conf
     counter +=int(how_many_in_conference(options.ip,options.username,options.password,conf['name']))
 
 

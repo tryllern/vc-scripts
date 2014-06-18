@@ -72,7 +72,7 @@ output_text="active_ports:%d " % counter
 
 # if it is no active perticipants, everything is definitely ok
 if counter==0:
-	
+	print output_text
 	exit(0)
 
 

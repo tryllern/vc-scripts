@@ -51,7 +51,9 @@ else:
 
 	if not options.warning:
 		warning=int(options.critical)
-
+	else:
+		warning=int(options.warning)
+			
 	critical=int(options.critical)
 
 	if not options.max:

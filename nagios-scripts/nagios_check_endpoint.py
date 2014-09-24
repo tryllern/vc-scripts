@@ -20,7 +20,7 @@ if options.ip is None or options.username is None or options.password is None:
 
 h323_code=0
 sip_code=0
-exit_text="Connection Error"
+exit_text=""
 
 
 
@@ -49,6 +49,23 @@ def getline(ip,username,password,url,identifier):
 
 
 
+def parse(status,proto):
+	if status=="inactive":
+		code=1
+		exit_text =" {}-Status:{}".format(proto,status)
+	
+	elif status=="registered":
+		code=0
+		exit_text =" {}-Status:{}".format(proto,status)
+	
+	elif status=="rejected":
+		h323_code=2
+		exit_text =" {}-Status:{}".format(proto,status)	
+	
+	else:
+		code=3
+		exit_text =" {}-Status:{}".format(proto,status)
+	return(code,exit_text)
 
 software_version=getline(ip=options.ip,
 					  username=options.username,
@@ -70,25 +87,9 @@ if software_version:
 
 
 			if sip_response:		
-				
-				
-					status=sip_response.lower()
-					if status=="inactive":
-						sip_code=1
-						exit_text="SIP-Status:{}".format(status)
-
-					elif status=="registered":
-						sip_code=0
-						exit_text="SIP-Status:{}".format(status)
-
-					elif status=="rejected":
-						sip_code=2
-						exit_text="SIP-Status:{}".format(status)			
-
-					else:
-						sip_code=3
-						exit_text="SIP-Status:{}".format(status)
-						
+				status=sip_response.lower()
+				sip_code,text=parse(status,"SIP")
+				exit_text +=text		
 						
 			else:
 				sip_code=3
@@ -106,21 +107,8 @@ if software_version:
 
 				
 					status=h323_response.lower()
-					if status=="inactive":
-						h323_code=1
-						exit_text +=" H323-Status:{}".format(status)
-
-					elif status=="registered":
-						h323_code=0
-						exit_text +=" H323-Status:{}".format(status)
-
-					elif status=="rejected":
-						h323_code=2
-						exit_text +=" H323-Status:{}".format(status)	
-
-					else:
-						h323_code=3
-						exit_text +=" H323-Status:{}".format(status)
+					h323_code,text=parse(status,"H323")
+					exit_text +=text	
 			else:
 				
 				h323_code=3
@@ -140,22 +128,8 @@ if software_version:
 				
 				
 					status=sip_response.lower()
-					if status=="inactive":
-						sip_code=1
-						exit_text="SIP-Status:{}".format(status)
-
-					elif status=="registered":
-						sip_code=0
-						exit_text="SIP-Status:{}".format(status)
-
-					elif status=="rejected":
-						sip_code=2
-						exit_text="SIP-Status:{}".format(status)			
-
-					else:
-						sip_code=3
-						exit_text="SIP-Status:{}".format(status)
-						
+					sip_code,text=parse(status,"SIP")
+					exit_text +=text
 						
 			else:
 				sip_code=3
@@ -173,21 +147,8 @@ if software_version:
 
 				
 					status=h323_response.lower()
-					if status=="inactive":
-						h323_code=1
-						exit_text +=" H323-Status:{}".format(status)
-
-					elif status=="registered":
-						h323_code=0
-						exit_text +=" H323-Status:{}".format(status)
-
-					elif status=="rejected":
-						h323_code=2
-						exit_text +=" H323-Status:{}".format(status)	
-
-					else:
-						h323_code=3
-						exit_text +=" H323-Status:{}".format(status)
+					h323_code,text=parse(status,"H323")
+					exit_text +=text
 			else:
 				
 				h323_code=3
@@ -232,5 +193,5 @@ elif sip_code==3 and h323_code==1:
 
 
 # print status and exit
-print exit_text
+print exit_text[1:]
 exit(exit_code)

@@ -232,8 +232,5 @@ elif sip_code==3 and h323_code==1:
 
 
 # print status and exit
-print h323_code
-print sip_code
-print exit_code
 print exit_text
 exit(exit_code)

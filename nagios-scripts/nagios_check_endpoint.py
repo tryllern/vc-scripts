@@ -33,10 +33,12 @@ def getline(ip,username,password,url,identifier):
 	url= the part after getxml?location=' to extract from codec
 	identifier= the regex search-string
 	'''
-	response=requests.get(
-    	"https://"+ip+'/getxml?location='+url,
-    	auth=(username, password),
-    	verify=False,)
+	
+	try:
+		response=requests.get("https://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
+	 except:	
+	 	response=requests.get("http://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
+
 	if response.status_code==200:
 		regex=re.compile(identifier)
 		status=regex.search(response.text)

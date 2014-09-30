@@ -91,7 +91,7 @@ class SIP(Protocol):
             self.transport.loseConnection()
         else:    
         
-            self.factory.status=3
+            self.factory.status=2
             self.transport.loseConnection()
             
 

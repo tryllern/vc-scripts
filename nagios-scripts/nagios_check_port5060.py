@@ -73,7 +73,7 @@ class SIP(Protocol):
         sip_header+="Content-Length: 0\r\n"
         sip_header+="\r\n"
         
-        
+        print sip_header
         self.transport.write(sip_header)
         
 
@@ -86,12 +86,19 @@ class SIP(Protocol):
 
     def dataReceived(self,data):
         import re
+        print data
         if data.startswith("SIP/2.0 200 OK"):
+            
+            self.factory.responseText=data.split("\r\n")[0]
             self.factory.status=0
             self.transport.loseConnection()
         else:    
         
             self.factory.status=2
+            try:
+                self.factory.responseText=data.split("\r\n")[0]
+            except:
+                self.factory.responseText=data
             self.transport.loseConnection()
             
 
@@ -110,6 +117,7 @@ class SIPFactory(ClientFactory):
         return SIP(self)
 
     def clientConnectionFailed(self,connector,reason):
+        fact.status=2
         reactor.stop()  
 
     def clientConnectionLost(self,connector,reason):
@@ -144,10 +152,19 @@ point=reactor.connectTCP(options.ip,5060,fact)
 fact.uri=options.address
 fact.remote_uri=options.remote_address
 fact.status=0
+fact.responseText=""
 reactor.run()
 
+'''
 if fact.status==0:
-    print "OK"
+    print fact
 else:
     print "Connection Error"
-exit(fact.status)
+
+'''
+if fact.responseText=="":
+    print "Unknown Error!"
+    exit(3)
+else:
+    print fact.responseText
+    exit(fact.status)

@@ -18,8 +18,8 @@ if options.ip is None or options.username is None or options.password is None:
     p.print_help()
     exit(-1)
 
-h323_code=0
-sip_code=0
+h323_code=3
+sip_code=3
 exit_text=""
 
 

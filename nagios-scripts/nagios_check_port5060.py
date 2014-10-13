@@ -73,7 +73,9 @@ class SIP(Protocol):
         sip_header+="Content-Length: 0\r\n"
         sip_header+="\r\n"
         
-        print sip_header
+        if self.factory.debug==True:
+            print "[+] Sending data:"
+            print sip_header
         self.transport.write(sip_header)
         
 
@@ -86,7 +88,10 @@ class SIP(Protocol):
 
     def dataReceived(self,data):
         import re
-        print data
+        if self.factory.debug==True:
+            print "[+] Received data:" 
+            print data
+
         if data.startswith("SIP/2.0 200 OK"):
             
             self.factory.responseText=data.split("\r\n")[0]
@@ -136,6 +141,7 @@ p = optparse.OptionParser()
 p.add_option('-i',dest="ip",metavar="<address>",help='Adress to SIP Server')
 p.add_option('-a',dest="address",metavar="<address>",help='your URI' )
 p.add_option("-r",dest="remote_address",metavar="<Redirect>",help='remote URI')
+p.add_option("-d",dest="debug",metavar="<debug>",help="debugging",action='store_true')
 options, arguments = p.parse_args()
 
 
@@ -153,15 +159,15 @@ fact.uri=options.address
 fact.remote_uri=options.remote_address
 fact.status=3
 fact.responseText=""
+if options.debug is None:
+    fact.debug=False
+else:
+    fact.debug=True
+
+
 reactor.run()
 
-'''
-if fact.status==0:
-    print fact
-else:
-    print "Connection Error"
 
-'''
 if fact.responseText=="":
     print "Unknown Error!"
     exit(3)

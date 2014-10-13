@@ -36,7 +36,7 @@ def getline(ip,username,password,url,identifier):
 	
 	try:
 		response=requests.get("https://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
-	 except:	
+	except:	
 	 	response=requests.get("http://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
 
 	if response.status_code==200:

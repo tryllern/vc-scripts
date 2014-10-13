@@ -151,7 +151,7 @@ fact=SIPFactory()
 point=reactor.connectTCP(options.ip,5060,fact)
 fact.uri=options.address
 fact.remote_uri=options.remote_address
-fact.status=0
+fact.status=3
 fact.responseText=""
 reactor.run()
 

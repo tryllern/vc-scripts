@@ -18,8 +18,8 @@ if options.ip is None or options.username is None or options.password is None:
     p.print_help()
     exit(-1)
 
-h323_code=3
-sip_code=3
+h323_code=2
+sip_code=2
 exit_text=""
 
 
@@ -35,10 +35,13 @@ def getline(ip,username,password,url,identifier):
 	'''
 	
 	try:
-		response=requests.get("https://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
+		response=requests.get("https://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,timeout=30)
 	except:	
-	 	response=requests.get("http://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,)
-
+		try:	
+			response=requests.get("http://"+ip+'/getxml?location='+url,auth=(username, password),verify=False,timeout=30)
+		except:
+			return None
+			
 	if response.status_code==200:
 		regex=re.compile(identifier)
 		status=regex.search(response.text)
@@ -154,6 +157,12 @@ if software_version:
 			else:
 				
 				h323_code=3
+
+
+else:
+	sip_code=2
+	h323_code=2
+	exit_text=" Connection Error"
 
 #exit code 0
 if sip_code==0 and h323_code==0:

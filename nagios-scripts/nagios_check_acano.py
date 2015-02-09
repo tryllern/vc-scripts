@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #coding: utf8
-import json
 import requests
 import xml.etree.ElementTree as ET
 import re

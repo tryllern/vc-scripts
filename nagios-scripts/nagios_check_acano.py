@@ -71,9 +71,10 @@ else:
 
 
 	if active_ports==0:
-		print "utilization:0% |active_ports=0:{}:{}".format(warning,critical)
+		print "Active ports:0 (utilization:0%) |active_ports=0;{};{};0;0".format(warning,critical)
 	else:
 		percent_active_ports=int((float(active_ports)/float(max_calls))*100.0)
-		print "utilization:{}% |active_ports={};{};{}".format(percent_active_ports,active_ports,warning,critical)
+		print "Active ports:{} (utilization:{}%) |active_ports={};{};{};0;0".format(active_ports,percent_active_ports,active_ports,warning,critical)
 
 	exit(exit_code)
+

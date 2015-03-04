@@ -67,7 +67,7 @@ for conf in json.loads(active_conferences.text)['objects']:
     counter +=int(how_many_in_conference(options.ip,options.username,options.password,conf['name']))
 
 
-output_text="active_ports:%d " % counter
+output_text="active_ports:%d|active_ports=%d;%s;%s;0;0" % (counter,counter,options.warning,options.critical)
 
 # if it is no active perticipants, everything is definitely ok
 if counter==0:
